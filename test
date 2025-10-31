@@ -1,0 +1,38 @@
+/* Student Line of Credit Campaign Analysis */
+/* Tactic Event Data Pull */
+
+/* Connect to Teradata */
+%connectsql;
+
+/* Create tactic event table with campaign participants */
+proc sql;
+    create table work.tactic_participants as
+    select 
+        CLNT_NO,
+        AR_ID,
+        TACTIC_ID,
+        TREATMT_MN,
+        TREATMT_END_DT,
+        TST_GRP_CD,
+        RPT_GRP_CD
+    from DT2V01.TACTIC_EVNT_TP_AR_HIST
+    where TACTIC_ID in (
+        /* Tactic ID list to be inserted here */
+        '7545', '7525', '7526', '7486', 
+        '7540', '7541', '7528', '7529', 
+        '7542', '7520', '7539', '7538'
+    )
+    and TREATMT_MN is not null;
+quit;
+
+/* Display basic statistics */
+proc freq data=work.tactic_participants;
+    tables TACTIC_ID * TST_GRP_CD / missing;
+    title "Campaign Participants by Tactic ID and Test Group";
+run;
+
+proc means data=work.tactic_participants n nmiss;
+    var CLNT_NO;
+    class TACTIC_ID;
+    title "Client Count by Tactic ID";
+run;
